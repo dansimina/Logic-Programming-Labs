@@ -267,7 +267,7 @@ while(Low, High, Sum):-
     NewLow is Low + 1,
     while(NewLow, High, Sum1),
     Sum is Sum1 + Low.
-while(_, _, 0).
+while(High, High, 0).
 
 
 
@@ -296,6 +296,7 @@ dowhile(Low, High, Sum):-
     NewLow is Low + 1,
     while(NewLow, High, Sum1),
     Sum is Sum1 + Low.
-dowhile(Low, _, Low).
+dowhile(Low, Low, Low).
+dowhile(Low, High, Low):- Low > High.
     
     
