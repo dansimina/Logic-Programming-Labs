@@ -136,7 +136,7 @@ inorder_dl2(t(K,L,R),LS,LE):-
 
 fib(N,F):-
 	memofib(N,F),!.
-	fib(N,F):- N>1,
+fib(N,F):- N>1,
 	N1 is N-1,
 	N2 is N-2,
 	fib(N1,F1),
@@ -234,7 +234,11 @@ convertCL2DL([], LE, LE).
 convertCL2DL([H|T], [H|LS], LE):-
     convertCL2DL(T, LS, LE).
 
-convertDL2CL(LS, [], LS).
+
+convertDL2CL(LE, X, []):- var(LE), !, LE == X.
+convertDL2CL([H|T], LE, [H|R]):-
+    var(LE),
+    convertDL2CL(T, LE, R).
 
 
 
@@ -310,9 +314,16 @@ all_decompositions(_, R):-
 % S = [2, 5, 4, 7, 9, 6|E]
 
 
-% preorder_dl(t(K,L,R), S, E):- % *IMPLEMENTAȚI AICI*
+preorder_dl(nil, E, E).
+preorder_dl(t(K,L,R), [K|S], E):- 
+    preorder_dl(L, S, Int),
+    preorder_dl(R, Int, E).
 
-% postorder_dl(t(K,L,R), S, E):- % *IMPLEMENTAȚI AICI*
+postorder_dl(nil, E, E).
+postorder_dl(t(K,L,R), S, E):- 
+    postorder_dl(L, S, Int),
+    postorder_dl(R, Int, [K|E]).
+
 
 
 
@@ -322,7 +333,15 @@ all_decompositions(_, R):-
 % S = [2, 4, 6|E]
 
 
-% even_dl(t(K,L,R), S, E):- % *IMPLEMENTAȚI AICI*
+even_dl(nil, E, E).
+even_dl(t(K,L,R), S, E):- 
+	0 is K mod 2, !,
+    even_dl(L, S, [K|Int]),
+    even_dl(R, Int, E).
+even_dl(t(_,L,R), S, E):-
+    even_dl(L, S, Int),
+    even_dl(R, Int, E).
+
 
 
 
@@ -333,7 +352,16 @@ all_decompositions(_, R):-
 % S = [4, 5, 6|E]
 
 
-% between_dl(t(K,L,R), S, E):- % *IMPLEMENTAȚI AICI*
+between_dl(nil, E, E, _, _):- !.
+between_dl(t(K, _, R), S, E, K1, K2):- 
+    K =< K1, !,
+    between_dl(R, S, E, K1, K2).
+between_dl(t(K, L, _), S, E, K1, K2):-
+    K >= K2, !,
+    between_dl(L, S, E, K1, K2).
+between_dl(t(K, L, R), S, E, K1, K2):-
+    between_dl(L, S, [K|Int], K1, K2),
+    between_dl(R, Int, E, K1, K2).
 
 
 
@@ -344,5 +372,12 @@ all_decompositions(_, R):-
 % ? – incomplete_tree(T), collect_depth_k(T, 2, S, E).
 % S = [4, 9|E].
 
-    
-% collect_depth_k(t(K,L,R), S, E):- % *IMPLEMENTAȚI AICI*
+
+collect_depth_k(nil, _, E, E, _):- !.
+collect_depth_k(t(Key, _, _), K, [Key|E], E, K):- !.
+collect_depth_k(t(_, L, R), K, S, E, Level):-
+    Level1 is Level + 1,
+    collect_depth_k(L, K, S, Int, Level1),
+    collect_depth_k(R, K, Int, E, Level1).
+collect_depth_k(t(Key,L,R), K, S, E):- collect_depth_k(t(Key,L,R), K, S, E, 1).
+
